@@ -33,7 +33,8 @@ Print information about a model:
 ```python
 print_model_info("claude-3-5-sonnet-20240620")
 ```
-![](assets/model.png)
+
+<img src="assets/model.png" width="500"/>
 
 Print the highest scores for a benchmark and scorer:
 
@@ -44,7 +45,8 @@ print_high_scores(
     scores=scores
 )
 ```
-![](assets/highscores.png)
+
+<img src="assets/highscores.png" width="500"/>
 
 Track the best-performing model to date over time:
 ```python
@@ -55,4 +57,4 @@ print_performance_timeline(
 )
 ```
 
-![](assets/timeline.png)
+<img src="assets/timeline.png" width="500"/>
