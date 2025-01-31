@@ -38,13 +38,21 @@ print_model_info("claude-3-5-sonnet-20240620")
 Print the highest scores for a benchmark and scorer:
 
 ```python
-print_high_scores("bench.task.hendrycks_math.hendrycks_math_lvl_5", scores, "model_graded_equiv")
+print_high_scores(
+    task_path="bench.task.hendrycks_math.hendrycks_math_lvl_5",
+    scorer="model_graded_equiv",
+    scores=scores
+)
 ```
 ![](assets/highscores.png)
 
 Track the best-performing model to date over time:
 ```python
-print_performance_timeline("bench.task.gpqa.gpqa_diamond", scores, "choice")
+print_performance_timeline(
+    task_path="bench.task.gpqa.gpqa_diamond",
+    scorer="choice",
+    scores=scores
+)
 ```
 
 ![](assets/timeline.png)

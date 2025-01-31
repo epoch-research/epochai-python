@@ -62,7 +62,7 @@ def print_model_info(model_id: str):
         print("─" * 80)  # Separator between runs
 
 
-def print_high_scores(task_path: str, scores: list[Score], scorer: str):
+def print_high_scores(task_path: str, scorer: str, scores: list[Score]):
     task = Task.first(formula=f"path='{task_path}'")
     if not task:
         raise ValueError(f"Task {task_path} not found")
@@ -97,8 +97,8 @@ def print_high_scores(task_path: str, scores: list[Score], scorer: str):
     console.print(table)
 
 
-def print_performance_timeline(task_path: str, scores: list[Score], scorer: str, start_date=None,
-                               end_date=None):
+def print_performance_timeline(task_path: str, scorer: str, scores: list[Score], start_date=None,
+                             end_date=None):
     """Show how the best performance on a task evolved over time."""
     # Get all scores for the task and scorer
     task_scores = [
@@ -176,10 +176,17 @@ def main():
     tasks = Task.all(memoize=True)
     organizations = Organization.all(memoize=True)
 
-    print_model_info("claude-3-5-sonnet-20240620")
-    print_high_scores("bench.task.hendrycks_math.hendrycks_math_lvl_5", scores,
-                      "model_graded_equiv")
-    print_performance_timeline("bench.task.gpqa.gpqa_diamond", scores, "choice")
+    print_model_info(model_id="claude-3-5-sonnet-20240620")
+    print_high_scores(
+        task_path="bench.task.hendrycks_math.hendrycks_math_lvl_5",
+        scorer="model_graded_equiv",
+        scores=scores
+    )
+    print_performance_timeline(
+        task_path="bench.task.gpqa.gpqa_diamond",
+        scorer="choice",
+        scores=scores
+    )
 
 
 if __name__ == "__main__":
