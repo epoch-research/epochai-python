@@ -1,4 +1,3 @@
-
 This repository contains the Python client library of [Epoch AI](https://epoch.ai/). At the moment, only one feature is supported: reading from our database of ML models and benchmark results.
 
 ## Installation
@@ -14,4 +13,38 @@ pip install epochai
 3. Define the `AIRTABLE_BASE_ID` environment variable with the ID of the base you just copied.
 3. Create an Airtable API key with access to the base, and the following scopes: `data.records:read`, `schema.bases:read`. Define the `AIRTABLE_API_KEY` environment variable with the key.
 
-Now, you can get started with our example script:
+The database models are defined in `epochai.airtable.models`. 
+
+You can get started with our example script [`examples/airtable.py`](examples/airtable.py), or try the snippets below.
+
+```python
+from epochai.airtable.models import MLModel, Task, Score, Organization, BenchmarkRun
+
+# Get everything at the start to minimize API calls
+scores = Score.all(memoize=True)
+runs = BenchmarkRun.all(memoize=True)
+models = MLModel.all(memoize=True)
+tasks = Task.all(memoize=True)
+organizations = Organization.all(memoize=True)
+```
+
+Print information about a model:
+
+```python
+print_model_info("claude-3-5-sonnet-20240620")
+```
+![](assets/model.png)
+
+Print the highest scores for a benchmark and scorer:
+
+```python
+print_high_scores("bench.task.hendrycks_math.hendrycks_math_lvl_5", scores, "model_graded_equiv")
+```
+![](assets/highscores.png)
+
+Track the best-performing model to date over time:
+```python
+print_performance_timeline("bench.task.gpqa.gpqa_diamond", scores, "choice")
+```
+
+![](assets/timeline.png)
