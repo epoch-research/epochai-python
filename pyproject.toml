@@ -18,7 +18,10 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.7,<4"
+python = ">=3.9,<4"
+environs = "^14.1.0"
+pyairtable = "^3.0.1"
+rich = "^13.9.4"
 
 [tool.poetry.group.dev.dependencies]
 bump2version = "*"
