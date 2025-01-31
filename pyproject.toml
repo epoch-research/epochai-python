@@ -1,0 +1,41 @@
+[tool]
+[tool.poetry]
+name = "epochai"
+version = "0.1.0"
+homepage = "https://github.com/tadamcz/epochai"
+description = "Top-level package for Epoch AI client library."
+authors = ["Tom Adamczewski <tadamczewskipublic@gmail.com>"]
+readme = "README.md"
+license =  "MIT"
+classifiers=[
+    'License :: OSI Approved :: MIT License',
+    'Natural Language :: English',
+    'Programming Language :: Python :: 3',
+]
+packages = [
+    { include = "epochai" },
+    { include = "tests", format = "sdist" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.7,<4"
+
+[tool.poetry.group.dev.dependencies]
+bump2version = "*"
+coverage = "*"
+pytest = ">=7.2.0"
+pytest-pycharm = "*"
+
+black = {extras = ["d"], version = "*"}
+
+
+
+[tool.black]
+line-length = 100
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
