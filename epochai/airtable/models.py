@@ -41,6 +41,7 @@ class MLModel(Model):
     model_group = F.SingleLinkField("Model", "MLModelGroup", raise_if_many=True)  # type: ignore
     benchmark_runs = F.LinkField("benchmarks/runs", BenchmarkRun)
     hf_developer = F.TextField("Hugging Face developer id")  # type: ignore
+    release_date = F.DatetimeField("Version release date")  # type: ignore
 
     Meta = create_meta(table_name="Model versions")
 
