@@ -14,6 +14,8 @@ COLORS = {
     "ERROR": "red",
     "DEVELOPER": "cyan",
     "DATE": "grey70",
+    "ACCESSIBILITY": "orange",
+    "COMPUTE": "purple",
 }
 
 
@@ -30,6 +32,17 @@ def print_model_info(model_id: str):
         console.print(f"Released: [{COLORS['DATE']}]{model.release_date.strftime('%B %d, %Y')}[/]")
     else:
         console.print("Release date not available")
+
+    # Print model accessibility if available
+    if model.model_group.accessibility:
+        console.print(f"[{COLORS['ACCESSIBILITY']}]Accessibility: {model.model_group.accessibility}[/]")
+    else:
+        console.print("Accessibility not available")
+
+    if model.model_group.training_compute:
+        console.print(f"[{COLORS['COMPUTE']}]Estimated Training Compute: {model.model_group.training_compute} FLOP")
+    else:
+        console.print("Training compute estimate not available")
 
     # Print organizations
     console.print(f"\n[{COLORS['ORG']}]Organizations:[/]")
@@ -79,7 +92,8 @@ def print_high_scores(task_path: str, scorer: str, scores: list[Score]):
     table = Table(title=f"\nTop 10 Scores for {task_path} ({scorer})", show_header=True,
                   header_style="bold")
     table.add_column("Model ID", style=COLORS['MODEL'])
-    table.add_column("Release Date", style=COLORS['DATE'])  # Updated color style
+    table.add_column("Release Date", style=COLORS['DATE'])
+    table.add_column("Est. Training Compute", style=COLORS['COMPUTE'])
     table.add_column("Score", justify="right", style=COLORS['SCORE'])
     table.add_column("Std Error", justify="right", style=COLORS['ERROR'])
 
@@ -87,11 +101,16 @@ def print_high_scores(task_path: str, scorer: str, scores: list[Score]):
         run = score.benchmark_run
         release_date = run.model.release_date
         date_str = release_date.strftime("%Y-%m-%d") if release_date else "N/A"
+        if run.model.model_group.training_compute:
+            compute = f"{run.model.model_group.training_compute:.0e}"
+        else:
+            compute = "N/A"
         table.add_row(
             run.model.model_id,
             date_str,
+            compute,
             f"{score.mean:.3f}",
-            f"±{score.stderr:.3f}"
+            f"{score.stderr:.3f}"
         )
 
     console.print(table)
@@ -154,13 +173,20 @@ def print_performance_timeline(task_path: str, scorer: str, scores: list[Score],
     )
     table.add_column("Date", style=COLORS['DATE'])
     table.add_column("Model ID", style=COLORS['MODEL'])
+    table.add_column("Est. Training Compute", style=COLORS['COMPUTE'])
     table.add_column("Score", justify="right", style=COLORS['SCORE'])
     table.add_column("Std Error", justify="right", style=COLORS['ERROR'])
 
     for imp in improvements:
+        model = next((m for m in dated_scores if m.benchmark_run.model.model_id == imp['model']), None)
+        if model.benchmark_run.model.model_group.training_compute:
+            compute = f"{model.benchmark_run.model.model_group.training_compute:.0e}"
+        else:
+            compute = "N/A"
         table.add_row(
             imp['date'].strftime("%Y-%m-%d"),
             imp['model'],
+            compute,
             f"{imp['score']:.3f}",
             f"±{imp['stderr']:.3f}"
         )

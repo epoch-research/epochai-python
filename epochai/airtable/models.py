@@ -50,6 +50,9 @@ class MLModelGroup(Model):
     organizations = F.LinkField("Organization", "Organization")  # type: ignore
     Meta = create_meta(table_name="ML Models")
 
+    accessibility = F.TextField("Model accessibility")
+    training_compute = F.FloatField("Training compute (FLOP)")
+
 
 class Organization(Model):
     name = F.TextField("Organization")
