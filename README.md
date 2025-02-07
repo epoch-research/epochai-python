@@ -10,7 +10,7 @@ pip install epochai
 ### Reading from our Airtable database of ML models and benchmark results
 A few preparatory steps are required: 
 
-1. Open our [Airtable base](https://airtable.com/appsyxA7qAp1bvsrl/tblyjKGBmFS5khLdW/viwvuE5MiSv6wcyeW?blocks=hide)
+1. Open our [Airtable base](https://airtable.com/appsyxA7qAp1bvsrl/shroAmbNkK89Jq02c/tblyjKGBmFS5khLdW/viwvuE5MiSv6wcyeW?blocks=hide)
 2. Airtable doesn't allow public API access, so you'll have to make a copy of the base (unless you are an Epoch AI team member).
 3. Define the `AIRTABLE_BASE_ID` environment variable with the ID of the base you just copied. (The ID is in the URL and starts with `app`.)
 4. Create an Airtable API key with access to the base, and the following scopes: `data.records:read`, `schema.bases:read`. Define the `AIRTABLE_API_KEY` environment variable with the key.
