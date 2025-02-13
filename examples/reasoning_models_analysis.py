@@ -98,11 +98,6 @@ def main():
     # Get reasoning models
     reasoning_models = get_reasoning_models()
     
-    # Print basic info about reasoning models
-    console.print("\n[bold]Found 'reasoning'-models:[/]")
-    for model in reasoning_models:
-        console.print(f"• [blue]{model.model_id}[/]")
-    
     # Get Task objects for interesting tasks
     tasks = Task.all(memoize=True)
     interesting_tasks = [
