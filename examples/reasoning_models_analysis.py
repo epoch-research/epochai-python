@@ -33,17 +33,24 @@ def get_reasoning_models():
     ]
     return sorted(reasoning_models, key=lambda x: x.release_date if x.release_date else datetime.min)
 
-def print_model_comparison(models: list[MLModel], tasks: list[Task]):
-    """Compare reasoning models across specific benchmark tasks."""
+def print_model_comparison(models: list[MLModel], tasks: list[Task], task_scorers: dict[str, str]):
+    """
+    Compare reasoning models across specific benchmark tasks.
+    
+    Args:
+        models: List of models to compare
+        tasks: List of tasks to evaluate
+        task_scorers: Dictionary mapping task paths to their appropriate scorers
+    """
     scores = Score.all(memoize=True)
     
     # Collect scores for each model and task
     model_scores = defaultdict(dict)
     for score in scores:
         if score.benchmark_run.model.model_id in [m.model_id for m in models]:
-            if score.benchmark_run.task.path in [t.path for t in tasks]:
-                key = (score.benchmark_run.task.path, score.scorer)
-                model_scores[score.benchmark_run.model.model_id][key] = score
+            task_path = score.benchmark_run.task.path
+            if task_path in task_scorers and score.scorer == task_scorers[task_path]:
+                model_scores[score.benchmark_run.model.model_id][task_path] = score
 
     # Create comparison table
     table = Table(
@@ -57,7 +64,8 @@ def print_model_comparison(models: list[MLModel], tasks: list[Task]):
     
     # Add columns for each task
     for task in tasks:
-        table.add_column(task.name or task.path, style=COLORS['SCORE'])
+        scorer = task_scorers[task.path]
+        table.add_column(f"{task.name or task.path}\n[dim]({scorer})[/]", style=COLORS['SCORE'])
     
     # Add rows for each model
     for model in models:
@@ -70,12 +78,8 @@ def print_model_comparison(models: list[MLModel], tasks: list[Task]):
         
         # Add scores for each task
         for task in tasks:
-            # Try to find the main scorer for this task
-            score_key = next((k for k in model_scores[model.model_id].keys() 
-                            if k[0] == task.path), None)
-            
-            if score_key and score_key in model_scores[model.model_id]:
-                score = model_scores[model.model_id][score_key]
+            if task.path in model_scores[model.model_id]:
+                score = model_scores[model.model_id][task.path]
                 scores_for_tasks.append(
                     f"{score.mean:.3f} [dim {COLORS['ERROR']}]±{score.stderr:.3f}[/]"
                 )
@@ -109,7 +113,17 @@ def main():
         ]
     ]
     
-    print_model_comparison(reasoning_models, interesting_tasks)
+    # Define which scorer to use for each task
+    task_scorers = {
+        "bench.task.hendrycks_math.hendrycks_math_lvl_5": "model_graded_equiv",
+        "bench.task.gpqa.gpqa_diamond": "choice"
+    }
+    
+    print_model_comparison(
+        reasoning_models, 
+        interesting_tasks,
+        task_scorers=task_scorers
+    )
 
 if __name__ == "__main__":
     main() 
