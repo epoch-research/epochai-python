@@ -1,0 +1,115 @@
+from rich.console import Console
+from rich.table import Table
+from datetime import datetime
+from collections import defaultdict
+
+from epochai.airtable.models import MLModel, Score, Task
+
+console = Console()
+
+# Define colors for consistent styling
+COLORS = {
+    "MODEL": "blue",
+    "ORG": "yellow",
+    "TASK": "magenta",
+    "SCORE": "green",
+    "ERROR": "red",
+    "DATE": "grey70",
+    "ACCESSIBILITY": "orange",
+    "COMPUTE": "purple",
+}
+
+def get_reasoning_models():
+    """Fetch and return all reasoning-focused models (O1, O3, and Deepseek-R1)."""
+    models = MLModel.all(memoize=True)
+    reasoning_models = [
+        model for model in models 
+        if model.model_id.startswith(("o1-", "o3-")) or model.model_id == "DeepSeek-R1"
+    ]
+    # remove -preview models
+    reasoning_models = [
+        model for model in reasoning_models 
+        if not "preview" in model.model_id
+    ]
+    return sorted(reasoning_models, key=lambda x: x.release_date if x.release_date else datetime.min)
+
+def print_model_comparison(models: list[MLModel], tasks: list[Task]):
+    """Compare reasoning models across specific benchmark tasks."""
+    scores = Score.all(memoize=True)
+    
+    # Collect scores for each model and task
+    model_scores = defaultdict(dict)
+    for score in scores:
+        if score.benchmark_run.model.model_id in [m.model_id for m in models]:
+            if score.benchmark_run.task.path in [t.path for t in tasks]:
+                key = (score.benchmark_run.task.path, score.scorer)
+                model_scores[score.benchmark_run.model.model_id][key] = score
+
+    # Create comparison table
+    table = Table(
+        title="\nReasoning Model Performance Comparison",
+        show_header=True,
+        header_style="bold"
+    )
+    
+    table.add_column("Model ID", style=COLORS['MODEL'])
+    table.add_column("Release Date", style=COLORS['DATE'])
+    
+    # Add columns for each task
+    for task in tasks:
+        table.add_column(task.name or task.path, style=COLORS['SCORE'])
+    
+    # Add rows for each model
+    for model in models:
+        row = [model.model_id]
+        row.append(model.release_date.strftime("%Y-%m-%d") if model.release_date else "N/A")
+        
+        # Check if model has any scores before adding row
+        has_scores = False
+        scores_for_tasks = []
+        
+        # Add scores for each task
+        for task in tasks:
+            # Try to find the main scorer for this task
+            score_key = next((k for k in model_scores[model.model_id].keys() 
+                            if k[0] == task.path), None)
+            
+            if score_key and score_key in model_scores[model.model_id]:
+                score = model_scores[model.model_id][score_key]
+                scores_for_tasks.append(
+                    f"{score.mean:.3f} [dim {COLORS['ERROR']}]±{score.stderr:.3f}[/]"
+                )
+                has_scores = True
+            else:
+                scores_for_tasks.append("N/A")
+        
+        # Only add row if model has at least one score
+        if has_scores:
+            row.extend(scores_for_tasks)
+            table.add_row(*row)
+    
+    console.print(table)
+
+def main():
+    # Get reasoning models
+    reasoning_models = get_reasoning_models()
+    
+    # Print basic info about reasoning models
+    console.print("\n[bold]Found 'reasoning'-models:[/]")
+    for model in reasoning_models:
+        console.print(f"• [blue]{model.model_id}[/]")
+    
+    # Get Task objects for interesting tasks
+    tasks = Task.all(memoize=True)
+    interesting_tasks = [
+        task for task in tasks
+        if task.path in [
+            "bench.task.hendrycks_math.hendrycks_math_lvl_5",
+            "bench.task.gpqa.gpqa_diamond",
+        ]
+    ]
+    
+    print_model_comparison(reasoning_models, interesting_tasks)
+
+if __name__ == "__main__":
+    main() 
