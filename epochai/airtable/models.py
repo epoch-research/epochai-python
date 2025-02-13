@@ -31,6 +31,7 @@ class BenchmarkRun(Model):
 
 class Task(Model):
     path = F.TextField("path")
+    name = F.TextField("Name")
     benchmark_runs = F.LinkField("BenchmarkRuns", BenchmarkRun)
 
     Meta = create_meta(table_name="benchmarks/tasks")
