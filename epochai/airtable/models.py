@@ -18,6 +18,8 @@ class BenchmarkRun(Model):
     model = F.SingleLinkField("model", "MLModel", raise_if_many=True)  # type: ignore
     scores = F.LinkField("Scores", "Score")  # type: ignore
 
+    # The corresponding files can be read using Inspect’s `read_eval_log` function, documented here:
+    # https://inspect.ai-safety-institute.org.uk/reference/inspect_ai.log.html#read_eval_log
     logs = F.UrlField("logs")  # type: ignore
     log_viewer = F.TextField("log viewer")  # type: ignore
     job = F.UrlField("job")  # type: ignore
