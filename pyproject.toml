@@ -1,7 +1,7 @@
 [tool]
 [tool.poetry]
 name = "epochai"
-version = "0.1.2"
+version = "0.1.3"
 homepage = "https://github.com/epoch-research/epochai-python"
 description = "Top-level package for Epoch AI client library."
 authors = ["Tom Adamczewski <tadamczewskipublic@gmail.com>"]
