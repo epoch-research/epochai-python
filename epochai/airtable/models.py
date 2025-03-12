@@ -26,7 +26,7 @@ class BenchmarkRun(Model):
 
     inspect_run_id = F.TextField("id")  # type: ignore
     started_at = F.DatetimeField("started_at")  # type: ignore
-    succeeded_at = F.DatetimeField("succeeded_at")  # type: ignore
+    status = F.SelectField("Status")  # type: ignore
 
     Meta = create_meta(table_name="benchmarks/runs")
 
