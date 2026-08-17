@@ -30,6 +30,43 @@ class BenchmarkRun(Model):
 
     Meta = create_meta(table_name="benchmarks/runs")
 
+    def read_eval_log(self, **kwargs):
+        """
+        Read this run's eval log using Inspect's `read_eval_log` function.
+
+        The log is fetched from the URL in the `logs` field (typically an S3
+        path, which requires the relevant credentials to be configured).
+        Extra keyword arguments are passed through to `read_eval_log`.
+
+        Requires the `inspect-ai` package to be installed.
+        """
+        try:
+            from inspect_ai.log import read_eval_log
+        except ImportError as e:
+            raise ImportError(
+                "Reading eval logs requires the `inspect-ai` package: pip install inspect-ai"
+            ) from e
+
+        return read_eval_log(self.logs, **kwargs)
+
+    def response_lengths(self) -> list[int]:
+        """
+        Response length, in output tokens, for each sample in this run.
+
+        The lengths are computed from the run's eval log (see `read_eval_log`),
+        so no manual log handling is required. Samples without recorded token
+        usage (e.g. failed samples) count as 0.
+        """
+        log = self.read_eval_log()
+        lengths = []
+        for sample in log.samples or []:
+            usage = sample.output.usage
+            if usage and usage.output_tokens is not None:
+                lengths.append(usage.output_tokens)
+            else:
+                lengths.append(0)
+        return lengths
+
 
 class Task(Model):
     path = F.TextField("path")
